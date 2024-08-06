@@ -1,8 +1,11 @@
 {
-  "name": "node-javascript-template",
+  "name": "node-templates-cli",
   "version": "0.0.0",
   "main": "src/index.js",
   "type": "module",
+  "bin": {
+    "nt": "bin/cli.js"
+  },
   "scripts": {
     "lint": "eslint",
     "format": "prettier --write .",
