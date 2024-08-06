@@ -1,0 +1,35 @@
+{
+  "name": "node-javascript-template",
+  "version": "0.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "prepare": "husky",
+    "dev": "node src/index.js",
+    "test": "node --test"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-n": "^17.10.2",
+    "globals": "^15.9.0",
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.8",
+    "prettier": "3.3.3"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint",
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
