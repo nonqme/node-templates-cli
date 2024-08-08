@@ -14,12 +14,9 @@ export async function init() {
     const template = TEMPLATES.find(
       (template) => template.name === templateName
     );
-
-    cloneRepository(template.repository);
+    cloneRepository(template.repository, projectName);
 
     const projectPath = path.join(process.cwd(), projectName);
-
-    await renameFolder(path.join(process.cwd(), template.folder), projectPath);
     await updatePackageJson(projectPath, projectName);
     await removeGitFolder(projectPath);
     initializeGitRepository(projectPath);
@@ -53,12 +50,8 @@ const getProjectTemplate = async (templates) => {
   });
 };
 
-const cloneRepository = (repository) => {
-  spawnSync('git', ['clone', repository], { stdio: 'inherit' });
-};
-
-const renameFolder = async (oldPath, newPath) => {
-  await fs.rename(oldPath, newPath);
+const cloneRepository = (repository, folderName) => {
+  spawnSync('git', ['clone', repository, folderName], { stdio: 'inherit' });
 };
 
 const updatePackageJson = async (projectPath, projectName) => {
