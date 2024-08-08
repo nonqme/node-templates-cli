@@ -7,43 +7,27 @@ import { TEMPLATES } from './templates.js';
 import { INVALID_PACKAGE_NAME } from './errors.js';
 
 export async function init() {
-  const projectName = await getProjectName();
-  const templateName = await getProjectTemplate(TEMPLATES);
+  try {
+    const projectName = await getProjectName();
+    const templateName = await getProjectTemplate(TEMPLATES);
 
-  const template = TEMPLATES.find((template) => template.name === templateName);
+    const template = TEMPLATES.find(
+      (template) => template.name === templateName
+    );
 
-  spawnSync('git', ['clone', template.repository], {
-    stdio: 'inherit',
-  });
+    cloneRepository(template.repository);
 
-  await fs.rename(
-    path.join(process.cwd(), template.folder),
-    path.join(process.cwd(), projectName)
-  );
+    const projectPath = path.join(process.cwd(), projectName);
 
-  const packageJson = await fs.readFile(
-    path.join(process.cwd(), projectName, 'package.json'),
-    'utf-8'
-  );
+    await renameFolder(path.join(process.cwd(), template.folder), projectPath);
+    await updatePackageJson(projectPath, projectName);
+    await removeGitFolder(projectPath);
+    initializeGitRepository(projectPath);
 
-  const packageData = JSON.parse(packageJson);
-  packageData.name = projectName;
-
-  await fs.writeFile(
-    path.join(process.cwd(), projectName, 'package.json'),
-    JSON.stringify(packageData, null, 2)
-  );
-
-  await fs.rm(path.join(process.cwd(), projectName, '.git'), {
-    recursive: true,
-  });
-
-  spawnSync('git', ['init'], {
-    cwd: path.join(process.cwd(), projectName),
-    stdio: 'inherit',
-  });
-
-  console.log('Project initialized');
+    console.log('Project initialized');
+  } catch (error) {
+    console.error('Error initializing project:', error);
+  }
 }
 
 const getProjectName = async () => {
@@ -56,18 +40,39 @@ const getProjectName = async () => {
 const validatePackageName = (value) => {
   const packageNameRegex =
     /^(?:@[a-z0-9-_]{1,213}\/)?[a-z0-9][a-z0-9-_]{0,212}$/;
-  if (packageNameRegex.test(value)) return true;
-  return false;
+  return packageNameRegex.test(value);
 };
 
 const getProjectTemplate = async (templates) => {
   return select({
     message: 'Select template',
-    choices: templates.map((template) => {
-      return {
-        title: template.name,
-        value: template.name,
-      };
-    }),
+    choices: templates.map((template) => ({
+      title: template.name,
+      value: template.name,
+    })),
   });
+};
+
+const cloneRepository = (repository) => {
+  spawnSync('git', ['clone', repository], { stdio: 'inherit' });
+};
+
+const renameFolder = async (oldPath, newPath) => {
+  await fs.rename(oldPath, newPath);
+};
+
+const updatePackageJson = async (projectPath, projectName) => {
+  const packageJsonPath = path.join(projectPath, 'package.json');
+  const packageJson = await fs.readFile(packageJsonPath, 'utf-8');
+  const packageData = JSON.parse(packageJson);
+  packageData.name = projectName;
+  await fs.writeFile(packageJsonPath, JSON.stringify(packageData, null, 2));
+};
+
+const removeGitFolder = async (projectPath) => {
+  await fs.rm(path.join(projectPath, '.git'), { recursive: true });
+};
+
+const initializeGitRepository = (projectPath) => {
+  spawnSync('git', ['init'], { cwd: projectPath, stdio: 'inherit' });
 };
