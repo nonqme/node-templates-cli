@@ -8,11 +8,8 @@ const prog = sade('nt');
 
 prog.version('0.0.1');
 
-prog
-  .command('init')
-  .option('-t, --template', 'Template name(typescript, javascript)')
-  .action((options) => {
-    init(options);
-  });
+prog.command('init').action(() => {
+  init();
+});
 
 prog.parse(process.argv);
