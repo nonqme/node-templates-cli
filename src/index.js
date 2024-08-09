@@ -18,6 +18,7 @@ export async function init() {
     await updatePackageJson(projectPath, projectName);
     await removeGitFolder(projectPath);
     await initializeGitRepository(projectPath);
+    await installDependencies(projectPath);
   } catch (error) {
     console.error(error.message);
   }
@@ -86,6 +87,19 @@ const cloneGitRepository = async (repository, folderName) => {
         );
       }
       console.log('Template repository cloned successfully!');
+      resolve(stdout);
+    });
+  });
+};
+
+const installDependencies = async (projectPath) => {
+  return new Promise((resolve, reject) => {
+    exec('npm install', { cwd: projectPath }, (error, stdout, stderr) => {
+      console.log('Installing dependencies...');
+      if (error) {
+        return reject(new Error(stderr));
+      }
+      console.log('Dependencies installed successfully!');
       resolve(stdout);
     });
   });
